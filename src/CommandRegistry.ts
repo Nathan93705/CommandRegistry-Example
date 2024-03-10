@@ -14,6 +14,7 @@ interface RegistryCommand {
 
 let registeredCommands: RegistryCommand[] = []
 let registryStarted: boolean = false
+let instance: Serenity | undefined;
 /**
 * The Command Registry.
 */
@@ -28,6 +29,7 @@ export default class CommandRegistry {
             throw error(`Error Starting CommandRegistry; Registry Is Already Started`)
         }
         registryStarted = true
+        instance = serenity
         let network = serenity.network
         network.before(Packet.CommandRequest, ({ packet, session }) => {
             let registry = new CommandRegistry()
@@ -81,8 +83,8 @@ export default class CommandRegistry {
         }
         if (this.commandExist(data.name)) {
             registeredCommands.push({ commandData: data, callBack: callBack })
-            console.log(`[Command Registry] Registered "${data.name}"`)
-            console.log(this.getCommands())
+            if (!instance) return
+            instance.logger.info(`[Command Registry] Registered "${data.name}"`)
         } else {
             throw error(`Error Registerying Command; Command "${data.name}" is already registered`)
         }
